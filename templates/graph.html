@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Graph
+{% endblock %}
+
+{% block main %}
+  <form action="/graph" method="post">
+      <div class="mb-3">
+          <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text" required>
+      </div>
+      <div class="mb-3">
+          <input autofocus class="form-control mx-auto w-auto" id="start_date", name="start_date" placeholder="Start Date" type="date" required>  
+      </div>
+      <div class="mb-3">
+          <input autofocus class="form-control mx-auto w-auto" id="end_date", name="end_date" placeholder="End Date" type="date" required>  
+      </div>
+      <div class="mb-3">
+          <select class="form-control mx-auto w-auto" name="interval" id="interval">
+            <option value="1d" selected>Day</option>
+            <option value="1w">Week</option>
+            <option value="1mo">Month</option>
+          </select>
+      </div>
+      <button class="btn btn-primary" type="submit">Log In</button>
+  </form>
+  {% if graph %}
+    <div class="">
+      <img src="{{url}}" alt="{{symbol}}">
+    </div>
+  {% endif %}
+{% endblock %}
