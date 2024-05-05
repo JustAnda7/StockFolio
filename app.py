@@ -121,7 +121,7 @@ def buy():
                         data["name"],
                         shares,
                         data["price"],
-                        date.strftime("%x %X"), # strftime is function under datetime imported
+                        date.strftime("%Y-%m-%d %H:%M:%S"), # strftime is function under datetime imported
                         "buy",
                         ))
             mysql_db.commit()
@@ -312,7 +312,7 @@ def sell():
                         data["name"],
                         -shares,
                         data["price"],
-                        date.strftime("%x %X"), # strftime is function under datetime imported but why not working??
+                        date.strftime("%Y-%m-%d %H:%M:%S"), # strftime is function under datetime imported but why not working??
                         "sell",
                         ))
 
@@ -333,8 +333,8 @@ def plot_graph():
     graph = False
     if request.method == "POST":
         symbol = request.form.get("symbol")
-        start_date = request.form.get("start_date")
-        end_date = request.form.get("end_date")
+        start_date = datetime.strptime(request.form.get("start_date"), "%Y-%m-%d")
+        end_date = datetime.strptime(request.form.get("end_date"), "%Y-%m-%d")
         interval = request.form.get("interval")
         stock_data = plot.get_historical_data(symbol, start_date, end_date, interval)
         graph = plot.plot_candlesticks(stock_data, symbol)
