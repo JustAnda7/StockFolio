@@ -1,6 +1,7 @@
 import os
 import re
 import plot
+import threading
 import mysql.connector
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
@@ -333,12 +334,19 @@ def plot_graph():
     graph = False
     if request.method == "POST":
         symbol = request.form.get("symbol")
+        y_hat30 = []
         start_date = datetime.strptime(request.form.get("start_date"), "%Y-%m-%d")
         end_date = datetime.strptime(request.form.get("end_date"), "%Y-%m-%d")
         interval = request.form.get("interval")
         stock_data = plot.get_historical_data(symbol, start_date, end_date, interval)
-        graph = plot.plot_candlesticks(stock_data, symbol)
+        pred_data = plot.feature_engi(stock_data)
+        th1 = threading.Thread(target=plot.prediction, args=(pred_data['engi_data'], pred_data['30daytest'], y_hat30))
+        th2 = threading.Thread(target=plot.plot_candlesticks, args=(stock_data, symbol, graph,))
+        th1.start()
+        th2.start()
         url = f"static/graphs/{symbol}.png"
-        return render_template("graph.html", graph=graph, url=url, symbol=symbol)
+        day30pred = y_hat30[-1]
+        day7pred = y_hat30[-23]
+        return render_template("graph.html", graph=graph, url=url, symbol=symbol, day30pred=day30pred, day7pred=day7pred)
     else:
         return render_template("graph.html", graph=graph)

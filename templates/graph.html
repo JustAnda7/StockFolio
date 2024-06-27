@@ -24,9 +24,15 @@
       </div>
       <button class="btn btn-primary" type="submit">Log In</button>
   </form>
-  {% if graph %}
+  {% if graph && day30pred && day7pred %}
     <div class="">
       <img src="{{url}}" alt="{{symbol}}">
+    </div>
+    <div>
+      Monthly Prediction: {{day30pred}}
+    </div>
+    <div>
+      Weekly Prediction: {{day7pred}}
     </div>
   {% endif %}
 {% endblock %}
