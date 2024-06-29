@@ -1,3 +1,6 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 class LocallyWeightedRegression:
     #maths behind Linear Regression:
     # theta = inv(X.T*W*X)*(X.T*W*Y)this will be our theta whic will 
