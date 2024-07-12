@@ -32,7 +32,8 @@ def hist_stock_mani(hist_data):
   return hist_data
 
 def feature_engi(hist_data):
-  df = hist_data.iloc[:, ['Close']]
+  df = hist_data.loc[:, ['Close']]
+  print(df.index[0])
   df.index = df.index.to_period("D")
   ma = df['Close'].rolling(window=21, center=False).mean()
   fourier = CalendarFourier(freq="Y", order=10)
@@ -57,7 +58,7 @@ def feature_engi(hist_data):
   engi_data = X.dropna()
   return {'engi_data':engi_data,'7daytest': X_test7, '30daytest': X_test30}
 
-def prediction(engi_data, X_test7, X_test30, y_hat30):
+def prediction(engi_data, X_test30, X_test7 = False):
   lwr = model.LocallyWeightedRegression()
   # y1 = np.array([engi_data['pred7']])
   # y1 = y1.T
@@ -68,7 +69,7 @@ def prediction(engi_data, X_test7, X_test30, y_hat30):
   y_hat30 = lwr.fit_and_predict(X, y1, X_test30)
   return y_hat30
 
-def plot_line_graph(hist_data, symbol, graph):
+def plot_line_graph(hist_data, symbol):
   try:
     plt.figure(figsize=(70, 30))
     ax1 = plt.subplot2grid((6,1), (0,0), rowspan=5, colspan=1)
@@ -80,11 +81,11 @@ def plot_line_graph(hist_data, symbol, graph):
     ax2.plot(hist_data.index, hist_data['Vol20ma'], color='r')
     plt.savefig(f"static/graphs/{symbol}.png")
   except:
-    graph = False
+    return False
   
-  graph = True
+  return True
 
-def plot_candlesticks(hist_data, symbol, graph):
+def plot_candlesticks(hist_data, symbol):
   try:
     his = hist_data.drop(['Dividends', 'Stock Splits', 'Price20ma', 'Vol20ma', 'Price50ma'], axis='columns')
     his.reset_index(inplace=True)
@@ -110,6 +111,6 @@ def plot_candlesticks(hist_data, symbol, graph):
     ax2.set_ylabel("Vol")
     plt.savefig(f"static/graphs/{symbol}.png")
   except:
-    graph = False
+    return False
   
-  graph = True  
+  return True  

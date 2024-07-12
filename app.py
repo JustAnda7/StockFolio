@@ -60,22 +60,28 @@ def index():
     # Get the stocks' data user is holding
     db.execute("SELECT symbol, SUM(holdings) as holdings FROM stocks WHERE user_id = %s GROUP BY symbol HAVING (SUM(holdings) > 0)", (session["user_id"],))
     stocks = db.fetchall()
-    key_tuple = ("symbol", "holdings")
-    for stock in stocks:
-        stock = dict(zip(key_tuple, stock))
-    # total value of stocks held by user
+    # key_tuple = ("symbol", "holdings")
+    stock_data = []
     total_stock_value = 0
-    # update stocks
     for stock in stocks:
-        quote = lookup(stock["symbol"])
-        stock["name"] = quote["name"]
-        stock["price"] = quote["price"]
-        stock["total"] = stock["holdings"] * stock["price"]
-        total_stock_value += stock["total"]
+        # print(stock)
+        # stock = dict(zip(key_tuple, stock))
+    # total value of stocks held by user
+    # update stocks
+    # for stock in stocks:
+        print(stock)
+        s_data = {}
+        quote = lookup(stock[0])
+        s_data["name"] = quote["name"]
+        s_data["price"] = quote["price"]
+        s_data["total"] = float(stock[1]) * s_data["price"]
+        total_stock_value += s_data["total"]
+        print(s_data)
+        stock_data.append(s_data)
     # total value of user including cash
     total_cash = total_stock_value + user_cash["cash"] # user_cash + total_s_v is 'int' + 'list' not valid operand
     # user_cash = list, user_cash[0]=dict, user_cash[0]["cash"]=float or int
-    return render_template("index.html", stocks=stocks, user_cash=user_cash["cash"], total_cash=total_cash)
+    return render_template("index.html", stocks=stock_data, user_cash=usd(user_cash["cash"]), total_cash=total_cash)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -336,17 +342,23 @@ def plot_graph():
         symbol = request.form.get("symbol")
         y_hat30 = []
         start_date = datetime.strptime(request.form.get("start_date"), "%Y-%m-%d")
+        # print(start_date)
         end_date = datetime.strptime(request.form.get("end_date"), "%Y-%m-%d")
+        # print(end_date)
         interval = request.form.get("interval")
         stock_data = plot.get_historical_data(symbol, start_date, end_date, interval)
+        print(stock_data)
         pred_data = plot.feature_engi(stock_data)
-        th1 = threading.Thread(target=plot.prediction, args=(pred_data['engi_data'], pred_data['30daytest'], y_hat30))
-        th2 = threading.Thread(target=plot.plot_candlesticks, args=(stock_data, symbol, graph,))
-        th1.start()
-        th2.start()
+        y_hat30 = plot.prediction(pred_data['engi_data'], pred_data['30daytest'])
+        graph = plot.plot_candlesticks(stock_data, symbol)
         url = f"static/graphs/{symbol}.png"
+        print(y_hat30)
         day30pred = y_hat30[-1]
         day7pred = y_hat30[-23]
         return render_template("graph.html", graph=graph, url=url, symbol=symbol, day30pred=day30pred, day7pred=day7pred)
     else:
         return render_template("graph.html", graph=graph)
+    
+
+
+app.run(port=5000)

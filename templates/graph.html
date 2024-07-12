@@ -10,9 +10,11 @@
           <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text" required>
       </div>
       <div class="mb-3">
+          <label for="start_date"> Start Date</label>
           <input autofocus class="form-control mx-auto w-auto" id="start_date", name="start_date" placeholder="Start Date" type="date" required>  
       </div>
       <div class="mb-3">
+          <label for="end_date"> End Date</label>
           <input autofocus class="form-control mx-auto w-auto" id="end_date", name="end_date" placeholder="End Date" type="date" required>  
       </div>
       <div class="mb-3">
@@ -22,9 +24,9 @@
             <option value="1mo">Month</option>
           </select>
       </div>
-      <button class="btn btn-primary" type="submit">Log In</button>
+      <button class="btn btn-primary" type="submit">Show</button>
   </form>
-  {% if graph && day30pred && day7pred %}
+  {% if (graph and day30pred and day7pred) %}
     <div class="">
       <img src="{{url}}" alt="{{symbol}}">
     </div>

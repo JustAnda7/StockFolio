@@ -11,8 +11,8 @@ class LocallyWeightedRegression:
     def kernel(self, query_point, X):
         Weight_matrix = np.mat(np.eye(len(X)))
         for idx in range(len(X)):
-            Weight_matrix[idx,idx] = np.exp(np.dot(X[idx]-query_point, (X[idx]-query_point).T)/(-2*self.tau*self.tau))
-#             print(Weight_matrix[idx,idx])
+            # check for inf values
+            Weight_matrix[idx,idx] = np.exp(-(np.dot(X[idx]-query_point, (X[idx]-query_point).T))/(-2*self.tau*self.tau))
         return Weight_matrix
     # function that makes the predictions of the output of a given query point
     def predict(self, X, Y, query_point):
@@ -29,8 +29,8 @@ class LocallyWeightedRegression:
         for x in X_test:
             pred = self.predict(X, Y, x)
             Y_test[i] = pred[0]
-            Y.append(pred[0])
-            X.append(x)
+            Y = np.append(Y, pred[0])
+            X = np.append(X, x)
             i += 1
 #         Y_test = np.array(Y_test)
         return Y_test
