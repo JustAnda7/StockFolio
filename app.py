@@ -1,6 +1,6 @@
 import os
 import re
-import plot
+# import plot
 import threading
 import mysql.connector
 from flask import Flask, flash, redirect, render_template, request, session
