@@ -2,12 +2,14 @@ import os
 import re
 # import plot
 import threading
-import mysql.connector
+# import mysql.connector
+import pymysql
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
+pymysql.install_as_MySQLdb()
 
 from helpers import apology, login_required, lookup, usd
 
@@ -31,7 +33,7 @@ user = 'anda'
 password = 'password'
 database = 'test'
 
-mysql_db = mysql.connector.connect(host = host,
+mysql_db = pymysql.connect(host = host,
                                 user = user,
                                 password = password,
                                 database = database)
@@ -145,13 +147,16 @@ def buy():
 def history():
     """Show history of transactions"""
     db = mysql_db.cursor()
+    trans = []
     # get the data from transaction table
-    db.execute("SELECT * FROM stocks WHERE user_id = ?", (session["user_id"],))
+    db.execute("SELECT * FROM stocks WHERE user_id = %s", (session["user_id"],))
     stocks = db.fetchall()
+    # print(stocks)
     key_tuple = ('user_id', 'symbol', 'name', 'holdings', 'price', 'tran_date', 'operation')
     for stock in stocks:
-        stock = dict(zip(key_tuple, stock))
-    return render_template("history.html", stocks=stocks)
+        trans.append(dict(zip(key_tuple, stock)))
+    # print(trans)
+    return render_template("history.html", stocks=trans)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -283,10 +288,13 @@ def register():
 def sell():
     """Sell shares of stock"""
     db = mysql_db.cursor()
+    held_stocks = []
     # user arrives via post
     if request.method == "POST":
         symbol = request.form.get("symbol")
+        print(symbol)
         shares = request.form.get("shares")
+        print(shares)
         data = lookup(symbol)
 
         if not symbol:
@@ -304,7 +312,9 @@ def sell():
                      data["symbol"])
                     )
         stocks = db.fetchall()
-        stocks = { 'holdings': stocks[0] }
+        # print(stocks)
+        stocks = { 'holdings': stocks[0][0] }
+        # print(stocks)
         date = datetime.now()
 
         if shares > stocks["holdings"]: # Typeerror ??
@@ -328,11 +338,13 @@ def sell():
             return redirect("/")
     # user arrives via get request
     else:
-         db.execute("SELECT symbol FROM stocks WHERE user_id = ? GROUP BY symbol",(session["user_id"],))
+         db.execute("SELECT symbol FROM stocks WHERE user_id = %s GROUP BY symbol",(session["user_id"],))
          stocks = db.fetchall()
          for stock in stocks:
-            stock = dict(zip(('symbol',), stock))
-         return render_template("sell.html", stocks=stocks)
+            held_stocks.append(dict(zip(('symbol',), stock)))
+            print(stock)
+         print(held_stocks)
+         return render_template("sell.html", stocks=held_stocks)
 
 @app.route("/graph", methods=["GET", "POST"])
 @login_required
@@ -361,4 +373,4 @@ def plot_graph():
     
 
 
-app.run(port=5000)
+# app.run(port=5000)
